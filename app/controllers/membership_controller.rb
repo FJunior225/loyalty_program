@@ -36,7 +36,7 @@ class MembershipController < ApplicationController
       response = JSON.parse(res.body)
       response_data = response["response_data"]
       status_code = response["status_code"]
-      render :json => { complete: "Loyalties Updated"}
+      render :json => { complete: "Funds deducted Loyalties Updated"}
     else
       dict = {
         "item_id": @vault_id,
@@ -58,7 +58,7 @@ class MembershipController < ApplicationController
       response = JSON.parse(res.body)
       response_data = response["response_data"]
       status_code = response["status_code"]
-      render :json => { complete: "Loyalties Updated"}
+      render :json => { complete: "Funds added Loyalties Updated"}
     end
   end
 
