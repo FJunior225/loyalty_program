@@ -1,6 +1,5 @@
 class ModoController < ApplicationController
   # before_action :authentication
-  before_filter :allow_ajax_request_from_other_domains  
 
   NEW_USER = 'https://hack.modoapi.com/1.0.0-dev/people/register'
   GET_VAULT = 'https://hack.modoapi.com/1.0.0-dev/vault/fetch'
@@ -12,8 +11,8 @@ class ModoController < ApplicationController
     payload = { api_key: ENV["API_KEY"], iat: Time.now }
     token = JWT.encode(payload, ENV["SECRET_KEY"], 'HS256')
     @card = request["uid"]
-    @merch_id = "0100"
-    @amount_due = 22.50
+    @merch_id = 0100
+    @amount_due = "22500".to_i
     # request["amountDue"].to_i
 
     # Create new Use
@@ -176,9 +175,4 @@ class ModoController < ApplicationController
     puts "HTTP Request failed (#{e.message})"
   end
 
- def allow_ajax_request_from_other_domains
-   headers['Access-Control-Allow-Origin'] = '*'
-   headers['Access-Control-Request-Method'] = '*'
-   headers['Access-Control-Allow-Headers'] = '*'
- end
 end
