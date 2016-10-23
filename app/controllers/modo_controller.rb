@@ -132,11 +132,14 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
-      @balance = response_data["balance"].to_i
+      puts response_data.class
       status_code = response["status_code"]
+      @balance = response_data["balance"].to_i
       render :json => { balance: @balance, complete: "Vault Created Loyalties Updated"}
-    else  
+    else 
+      puts "HEE" 
       @vault_id = response_data[0]["vault_id"]
+      puts @vault_id
       # make call to get loyalty points
       uri5 = URI(GET_BALANCE)
       http = Net::HTTP.new(uri5.host, uri5.port)
@@ -161,8 +164,8 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
+      puts response_data.class
       @balance = response_data[@vault_id]["balance"].to_i
-
       if @balance > @amount_due 
         # send request to ingenico 
         render :json => { item_id: @vault_id, amount_due: @amount_due, balance: @balance, covered: "yes" }
