@@ -8,11 +8,8 @@ class ModoController < ApplicationController
   GET_BALANCE = 'https://hack.modoapi.com/1.0.0-dev/vault/get_balance'
 
   def create
-
-    payload = { api_key: ENV["api_key"], iat: Time.now }
-
-    token = JWT.encode(payload, ENV["secret_key"], 'HS256')
-
+    payload = { api_key: ENV["API_KEY"], iat: Time.now }
+    token = JWT.encode(payload, ENV["SECRET_KEY"], 'HS256')
     @card = request["uid"]
     @merch_id = request["merchId"]
     @amount_due = request["amountDue"].to_i
@@ -72,6 +69,7 @@ class ModoController < ApplicationController
     response = JSON.parse(res.body)
     response_data = response["response_data"]
     if response_data.empty? #member is not signed up
+      puts "AM I here"
       # make post to vault
       uri3 = URI(POST_VAULT)
       http = Net::HTTP.new(uri3.host, uri3.port)
@@ -86,7 +84,7 @@ class ModoController < ApplicationController
             "account_id": @account_id,
             "unencrypted_json": {
               "merch_id": @merch_id,
-            "tap_id": @phone,
+            "tap_id": @card,
             "amount_due": @amount_due
             },
             "end_of_life": 1474480166,
@@ -110,7 +108,7 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
-      @vault_id = response_data["vault_id"]
+      @vault_id = response_data[0]["vault_id"]
       # vault is now setup and customer can just pay
       # make call to adjust vault balance
 
@@ -118,13 +116,14 @@ class ModoController < ApplicationController
       http = Net::HTTP.new(uri4.host, uri4.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      puts "before adjust"
       dict = {
         "item_id": @vault_id,
         "adjustment": "+#{@amount_due}"
          # add logic for points conversion
       }
       body = JSON.dump(dict)
-
+      puts "After Adjust"
       # Create Request
       req =  Net::HTTP::Post.new(uri4)
       # Add headers
@@ -139,10 +138,7 @@ class ModoController < ApplicationController
       response = JSON.parse(res.body)
       response_data = response["response_data"]
       status_code = response["status_code"]
-      puts "Response Data"
-      puts response_data
-      puts "Status Code"
-      puts status_code
+      render :json => { complete: "Loyalties Updated"}
     else  
       @vault_id = response_data[0]["vault_id"]
       # make call to get loyalty points
@@ -170,58 +166,16 @@ class ModoController < ApplicationController
       response = JSON.parse(res.body)
       response_data = response["response_data"]
       @balance = response_data[@vault_id]["balance"].to_i
+
       if @balance > @amount_due 
         # send request to ingenico 
-        render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "yes" }
+        render :json => { item_id: @vault_id, amount_due: @amount_due, covered: "yes" }
       else
-        render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "no" }
+        render :json => { item_id: @vault_id, amount_due: @amount_due, covered: "no" }
       end
     end
   rescue StandardError => e
     puts "HTTP Request failed (#{e.message})"
   end
-
-  # def update
-  #   uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
-
-  #   # Create client
-  #   http = Net::HTTP.new(uri.host, uri.port)
-  #   http.use_ssl = true
-  #   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-  #   dict = {
-  #     "vault_types": [
-  #       "ACME_LOYALTY"
-  #       ],
-  #     "account_id": @account_id,
-  #     "just_count": 1
-  #   }
-  #   body = JSON.dump(dict)
-
-  #   # Create Request
-  #   req =  Net::HTTP::Post.new(uri)
-  #   # Add headers
-  #   req.add_field "Authorization", "Token " + token
-  #   # Add headers
-  #   req.add_field "Content-Type", "application/json"
-  #   # Set body
-  #   req.body = body
-
-  #   # Fetch Request
-  #   res = http.request(req)
-  #   puts "Response HTTP Status Code: #{res.code}"
-  #   puts "Response HTTP Response Body: #{res.body}"
-  #   body = JSON.parse(res.body)
-  #   @count = body["response_data"]["count"].to_i
-  #   if @count > 0
-
-  #   else
-
-  #   end
-  # rescue StandardError => e
-  #   puts "HTTP Request failed (#{e.message})"
-  # end
-
-
-  # decoded_token = JWT.decode token, secret_key, true, { algorithm: 'HS256' }
 
 end
