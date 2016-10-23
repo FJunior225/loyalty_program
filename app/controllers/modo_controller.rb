@@ -1,5 +1,11 @@
 class ModoController < ApplicationController
   # before_action :authentication
+  
+  NEW_USER = 'https://hack.modoapi.com/1.0.0-dev/people/register'
+  GET_VAULT = 'https://hack.modoapi.com/1.0.0-dev/vault/fetch'
+  POST_VAULT = 'https://hack.modoapi.com/1.0.0-dev/vault/add'
+  ADJUST_BALANCE = 'https://hack.modoapi.com/1.0.0-dev/vault/adjust_demo_balance'
+  GET_BALANCE = 'https://hack.modoapi.com/1.0.0-dev/vault/get_balance'
 
   def create
 
@@ -12,7 +18,7 @@ class ModoController < ApplicationController
     @amount_due = request["amountDue"].to_i
 
     # Create new Use
-    uri = URI('https://hack.modoapi.com/1.0.0-dev/people/register')
+    uri = URI(NEW_USER)
 
     # Create client
     http = Net::HTTP.new(uri.host, uri.port)
@@ -41,7 +47,7 @@ class ModoController < ApplicationController
     @account_id = body["response_data"]["account_id"]
 
     # make call to get vault
-    uri2 = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
+    uri2 = URI(GET_VAULT)
     http = Net::HTTP.new(uri2.host, uri2.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -65,11 +71,9 @@ class ModoController < ApplicationController
     res = http.request(req)
     response = JSON.parse(res.body)
     response_data = response["response_data"]
-    puts "response_data: #{response_data}"
     if response_data.empty? #member is not signed up
       # make post to vault
-      puts "HERE IF"
-      uri3 = URI('https://hack.modoapi.com/1.0.0-dev/vault/add')
+      uri3 = URI(POST_VAULT)
       http = Net::HTTP.new(uri3.host, uri3.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -105,13 +109,12 @@ class ModoController < ApplicationController
       # Fetch Request
       res = http.request(req)
       response = JSON.parse(res.body)
-      puts "asjdfadksjhfkadsfja;s"
       response_data = response["response_data"]
       @vault_id = response_data["vault_id"]
       # vault is now setup and customer can just pay
       # make call to adjust vault balance
 
-      uri4 = URI('https://hack.modoapi.com/1.0.0-dev/vault/adjust_demo_balance')
+      uri4 = URI(ADJUST_BALANCE)
       http = Net::HTTP.new(uri4.host, uri4.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -139,7 +142,7 @@ class ModoController < ApplicationController
     else
       @vault_id = response_data[0]["vault_id"]
       # make call to get loyalty points
-      uri5 = URI('https://hack.modoapi.com/1.0.0-dev/vault/get_balance')
+      uri5 = URI(GET_BALANCE)
       http = Net::HTTP.new(uri5.host, uri5.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
@@ -162,15 +165,10 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
-      puts "RESPONSE"
-      puts "#{response_data}"
       @balance = response_data[@vault_id]["balance"].to_i
-      puts "----------------------"
-      if @balance > @amount_due
-        puts "HITTTTT"
-        # send request to ingenico
+      if @balance > @amount_due 
+        # send request to ingenico 
         render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "yes" }
-
       else
         render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "no" }
       end
