@@ -11,7 +11,7 @@ class ModoController < ApplicationController
     payload = { api_key: ENV["API_KEY"], iat: Time.now }
     token = JWT.encode(payload, ENV["SECRET_KEY"], 'HS256')
     @card = request["uid"]
-    @merch_id = request["merchId"]
+    @merch_id = 0100
     @amount_due = request["amountDue"].to_i
 
     # Create new Use
@@ -38,8 +38,6 @@ class ModoController < ApplicationController
 
     # Fetch Request
     res = http.request(req)
-    puts "Response HTTP Status Code: #{res.code}"
-    puts "Response HTTP Response Body: #{res.body}"
     body = JSON.parse(res.body)
     @account_id = body["response_data"]["account_id"]
 
@@ -69,7 +67,6 @@ class ModoController < ApplicationController
     response = JSON.parse(res.body)
     response_data = response["response_data"]
     if response_data.empty? #member is not signed up
-      puts "AM I here"
       # make post to vault
       uri3 = URI(POST_VAULT)
       http = Net::HTTP.new(uri3.host, uri3.port)
@@ -84,8 +81,8 @@ class ModoController < ApplicationController
             "account_id": @account_id,
             "unencrypted_json": {
               "merch_id": @merch_id,
-            "tap_id": @card,
-            "amount_due": @amount_due
+              "tap_id": @card,
+              "amount_due": @amount_due
             },
             "end_of_life": 1474480166,
             "disable": 0,
@@ -116,14 +113,12 @@ class ModoController < ApplicationController
       http = Net::HTTP.new(uri4.host, uri4.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      puts "before adjust"
       dict = {
         "item_id": @vault_id,
         "adjustment": "+#{@amount_due}"
          # add logic for points conversion
       }
       body = JSON.dump(dict)
-      puts "After Adjust"
       # Create Request
       req =  Net::HTTP::Post.new(uri4)
       # Add headers
@@ -137,8 +132,9 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
+      @balance = response_data["balance"].to_i
       status_code = response["status_code"]
-      render :json => { complete: "Loyalties Updated"}
+      render :json => { balance: @balance, complete: "Vault Created Loyalties Updated"}
     else  
       @vault_id = response_data[0]["vault_id"]
       # make call to get loyalty points
@@ -169,9 +165,9 @@ class ModoController < ApplicationController
 
       if @balance > @amount_due 
         # send request to ingenico 
-        render :json => { item_id: @vault_id, amount_due: @amount_due, covered: "yes" }
+        render :json => { item_id: @vault_id, amount_due: @amount_due, balance: @balance, covered: "yes" }
       else
-        render :json => { item_id: @vault_id, amount_due: @amount_due, covered: "no" }
+        render :json => { item_id: @vault_id, amount_due: @amount_due, balance: @balance, covered: "no" }
       end
     end
   rescue StandardError => e
