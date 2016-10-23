@@ -8,8 +8,8 @@ class ModoController < ApplicationController
   GET_BALANCE = 'https://hack.modoapi.com/1.0.0-dev/vault/get_balance'
 
   def create
-    payload = { api_key: ENV["API_KEY"], iat: Time.now }
-    token = JWT.encode(payload, ENV["SECRET_KEY"], 'HS256')
+    payload = { api_key: ENV["api_key"], iat: Time.now }
+    token = JWT.encode(payload, ENV["secret_key"], 'HS256')
     @card = request["uid"]
     @merch_id = request["merchId"]
     @amount_due = request["amountDue"].to_i
