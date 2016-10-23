@@ -2,12 +2,10 @@ class ModoController < ApplicationController
   # before_action :authentication
 
   def create
-    api_key = "b255a6fd-621a-4046-94b9-42236a4f05b7"
-    secret_key = "LFBq5g+7TLHVxroMqogudlobaTOxcZ4dRx435/PgOMU3Rf8w+L1UFeAMaEhxspH/d3zOVBjjaa8PyNSgVBkmpA=="
 
-    payload = { api_key: api_key, iat: Time.now }
+    payload = { api_key: ENV["api_key"], iat: Time.now }
 
-    token = JWT.encode(payload, secret_key, 'HS256')
+    token = JWT.encode(payload, ENV["secret_key"], 'HS256')
 
     @card = request["uid"]
     @merch_id = request["merchId"]
@@ -22,7 +20,7 @@ class ModoController < ApplicationController
     http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     dict = {
             "phone": @card,
-            
+
           }
     body = JSON.dump(dict)
 
@@ -41,7 +39,7 @@ class ModoController < ApplicationController
     puts "Response HTTP Response Body: #{res.body}"
     body = JSON.parse(res.body)
     @account_id = body["response_data"]["account_id"]
-    
+
     # make call to get vault
     uri2 = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
     http = Net::HTTP.new(uri2.host, uri2.port)
@@ -51,7 +49,7 @@ class ModoController < ApplicationController
       "vault_types": [
         "ACME_LOYALTY"
         ],
-        "account_id": @account_id    
+        "account_id": @account_id
       }
     body = JSON.dump(dict)
 
@@ -91,7 +89,7 @@ class ModoController < ApplicationController
             "disable": 0,
             "sequestered": 0
           }
-        ]    
+        ]
       }
       body = JSON.dump(dict)
 
@@ -119,7 +117,7 @@ class ModoController < ApplicationController
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       dict = {
         "item_id": @vault_id,
-        "adjustment": "-100" 
+        "adjustment": "-100"
          # add logic for points conversion
       }
       body = JSON.dump(dict)
@@ -168,11 +166,11 @@ class ModoController < ApplicationController
       puts "#{response_data}"
       @balance = response_data[@vault_id]["balance"].to_i
       puts "----------------------"
-      if @balance > @amount_due 
+      if @balance > @amount_due
         puts "HITTTTT"
-        # send request to ingenico 
+        # send request to ingenico
         render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "yes" }
-        
+
       else
         render :json => { account_id: @account_id, amount: @amount_due, merch_id: @merch_id, covered: "no" }
       end
@@ -212,7 +210,7 @@ class ModoController < ApplicationController
   #   puts "Response HTTP Response Body: #{res.body}"
   #   body = JSON.parse(res.body)
   #   @count = body["response_data"]["count"].to_i
-  #   if @count > 0 
+  #   if @count > 0
 
   #   else
 
@@ -222,14 +220,6 @@ class ModoController < ApplicationController
   # end
 
 
-  def authentication
-    api_key = "b255a6fd-621a-4046-94b9-42236a4f05b7"
-    secret_key = "LFBq5g+7TLHVxroMqogudlobaTOxcZ4dRx435/PgOMU3Rf8w+L1UFeAMaEhxspH/d3zOVBjjaa8PyNSgVBkmpA=="
-
-    payload = { api_key: api_key, iat: Time.now }
-
-    token = JWT.encode(payload, secret_key, 'HS256')
-  end
   # decoded_token = JWT.decode token, secret_key, true, { algorithm: 'HS256' }
 
 end
