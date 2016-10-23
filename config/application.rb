@@ -18,8 +18,15 @@ Bundler.require(*Rails.groups)
 
 module LoyaltyProgram
   class Application < Rails::Application
+    config.action_dispatch.default_headers = {
+      'Access-Control-Allow-Origin' => '*',
+      'Access-Control-Request-Method' => %w{GET POST PUT PATCH OPTIONS}.join(","),
+      'Access-Control-Allow-Headers' => %w{content-type, accept}
+    }
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
+    config.active_record.raise_in_transactional_callbacks = true
+
   end
 end
