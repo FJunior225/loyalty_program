@@ -166,7 +166,6 @@ class ModoController < ApplicationController
       res = http.request(req)
       response = JSON.parse(res.body)
       response_data = response["response_data"]
-      puts response_data.class
       @balance = response_data[@vault_id]["balance"].to_i
       if @balance > @amount_due 
         # send request to ingenico 
