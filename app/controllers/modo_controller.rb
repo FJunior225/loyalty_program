@@ -10,9 +10,12 @@ class ModoController < ApplicationController
   def create
     payload = { api_key: ENV["api_key"], iat: Time.now }
     token = JWT.encode(payload, ENV["secret_key"], 'HS256')
+    puts "My Params"
+    puts params
+    puts xhr.request?
     @card = request["uid"]
-    @merch_id = request["merchId"]
-    @amount_due = request["amountDue"].to_i
+    @merch_id = 0001
+    @amount_due = 30
 
     # Create new Use
     uri = URI(NEW_USER)
