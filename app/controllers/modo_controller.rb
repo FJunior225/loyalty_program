@@ -164,49 +164,49 @@ class ModoController < ApplicationController::Base
         render :json => { account_id, amount, merch_id, no }
 
       end
-  rescue StandardError => e
-    puts "HTTP Request failed (#{e.message})"
-end
-
-  def update
-    uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
-
-    # Create client
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-    dict = {
-      "vault_types": [
-        "ACME_LOYALTY"
-        ],
-      "account_id": @account_id,
-      "just_count": 1
-    }
-    body = JSON.dump(dict)
-
-    # Create Request
-    req =  Net::HTTP::Post.new(uri)
-    # Add headers
-    req.add_field "Authorization", "Token " + token
-    # Add headers
-    req.add_field "Content-Type", "application/json"
-    # Set body
-    req.body = body
-
-    # Fetch Request
-    res = http.request(req)
-    puts "Response HTTP Status Code: #{res.code}"
-    puts "Response HTTP Response Body: #{res.body}"
-    body = JSON.parse(res.body)
-    @count = body["response_data"]["count"].to_i
-    if @count > 0 
-
-    else
-
-    end
-  rescue StandardError => e
-    puts "HTTP Request failed (#{e.message})"
+    rescue StandardError => e
+      puts "HTTP Request failed (#{e.message})"
   end
+
+  # def update
+  #   uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
+
+  #   # Create client
+  #   http = Net::HTTP.new(uri.host, uri.port)
+  #   http.use_ssl = true
+  #   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+  #   dict = {
+  #     "vault_types": [
+  #       "ACME_LOYALTY"
+  #       ],
+  #     "account_id": @account_id,
+  #     "just_count": 1
+  #   }
+  #   body = JSON.dump(dict)
+
+  #   # Create Request
+  #   req =  Net::HTTP::Post.new(uri)
+  #   # Add headers
+  #   req.add_field "Authorization", "Token " + token
+  #   # Add headers
+  #   req.add_field "Content-Type", "application/json"
+  #   # Set body
+  #   req.body = body
+
+  #   # Fetch Request
+  #   res = http.request(req)
+  #   puts "Response HTTP Status Code: #{res.code}"
+  #   puts "Response HTTP Response Body: #{res.body}"
+  #   body = JSON.parse(res.body)
+  #   @count = body["response_data"]["count"].to_i
+  #   if @count > 0 
+
+  #   else
+
+  #   end
+  # rescue StandardError => e
+  #   puts "HTTP Request failed (#{e.message})"
+  # end
 
 
 
