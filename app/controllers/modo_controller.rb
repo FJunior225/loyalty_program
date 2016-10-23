@@ -120,7 +120,7 @@ class ModoController < ApplicationController
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
       dict = {
         "item_id": @vault_id,
-        "adjustment": "-100"
+        "adjustment": "+#{@amount_due}"
          # add logic for points conversion
       }
       body = JSON.dump(dict)
@@ -139,7 +139,11 @@ class ModoController < ApplicationController
       response = JSON.parse(res.body)
       response_data = response["response_data"]
       status_code = response["status_code"]
-    else
+      puts "Response Data"
+      puts response_data
+      puts "Status Code"
+      puts status_code
+    else  
       @vault_id = response_data[0]["vault_id"]
       # make call to get loyalty points
       uri5 = URI(GET_BALANCE)
