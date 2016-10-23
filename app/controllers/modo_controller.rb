@@ -12,7 +12,8 @@ class ModoController < ApplicationController
     token = JWT.encode(payload, ENV["SECRET_KEY"], 'HS256')
     @card = request["uid"]
     @merch_id = 0100
-    @amount_due = request["amountDue"].to_i
+    @amount_due = 22.50
+    # request["amountDue"].to_i
 
     # Create new Use
     uri = URI(NEW_USER)
