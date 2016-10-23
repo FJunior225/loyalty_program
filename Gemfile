@@ -19,7 +19,7 @@ gem 'jwt'
 # JWT Authentication for Modo
 gem 'http'
 # Sending Requests
-
+gem 'rack-cors'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
