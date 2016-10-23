@@ -5,167 +5,168 @@ class ModoController < ApplicationController::Base
     @card = request["uid"]
     @merch_id = request["merchId"]
     @amount_due = request["ammountDue"]
+    render :json => "hello world"
+    
+    # uri = URI('https://hack.modoapi.com/1.0.0-dev/people/register')
 
-    uri = URI('https://hack.modoapi.com/1.0.0-dev/people/register')
-
-    # Create client
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-    dict = {
-            "phone": @card,
+    # # Create client
+    # http = Net::HTTP.new(uri.host, uri.port)
+    # http.use_ssl = true
+    # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    # dict = {
+    #         "phone": @card,
             
-          }
-    body = JSON.dump(dict)
+    #       }
+    # body = JSON.dump(dict)
 
-    # Create Request
-    req =  Net::HTTP::Post.new(uri)
-    # Add headers
-    req.add_field "Authorization", "Token " + token
-    # Add headers
-    req.add_field "Content-Type", "application/json"
-    # Set body
-    req.body = body
+    # # Create Request
+    # req =  Net::HTTP::Post.new(uri)
+    # # Add headers
+    # req.add_field "Authorization", "Token " + token
+    # # Add headers
+    # req.add_field "Content-Type", "application/json"
+    # # Set body
+    # req.body = body
 
-    # Fetch Request
-    res = http.request(req)
-    puts "Response HTTP Status Code: #{res.code}"
-    puts "Response HTTP Response Body: #{res.body}"
-    body = JSON.parse(res.body)
-    @account_id = body["response_data"]["account_id"]
+    # # Fetch Request
+    # res = http.request(req)
+    # puts "Response HTTP Status Code: #{res.code}"
+    # puts "Response HTTP Response Body: #{res.body}"
+    # body = JSON.parse(res.body)
+    # @account_id = body["response_data"]["account_id"]
 
-    # make call to get vault
-    uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-    dict = {
-      "vault_types": [
-        "ACME_LOYALTY"
-        ],
-        "account_id": @account_id    
-      }
-    body = JSON.dump(dict)
+    # # make call to get vault
+    # uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/fetch')
+    # http = Net::HTTP.new(uri.host, uri.port)
+    # http.use_ssl = true
+    # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    # dict = {
+    #   "vault_types": [
+    #     "ACME_LOYALTY"
+    #     ],
+    #     "account_id": @account_id    
+    #   }
+    # body = JSON.dump(dict)
 
-    # Create Request
-    req =  Net::HTTP::Post.new(uri)
-    # Add headers
-    req.add_field "Authorization", "Token " + token
-    # Add headers
-    req.add_field "Content-Type", "application/json"
-    # Set body
-    req.body = body
+    # # Create Request
+    # req =  Net::HTTP::Post.new(uri)
+    # # Add headers
+    # req.add_field "Authorization", "Token " + token
+    # # Add headers
+    # req.add_field "Content-Type", "application/json"
+    # # Set body
+    # req.body = body
 
-    # Fetch Request
-    res = http.request(req)
-    response = JSON.parse(res.body)
-    response_data = response["response_data"]
-    if response_data.empty? #member is not signed up
-      # make post to vault
-      uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/add')
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      dict = {
-        "items": [
-          {
-            "vault_type": "ACME_LOYALTY",
-            "description": "Sample Card",
-            "encrypted_data": {},
-            "account_id": @account_id,
-            "unencrypted_json": {
-              "merch_id": 001,
-            "tap_id": 1234,
-            "amount_due": "get from initial tap"
-            },
-            "end_of_life": 1474480166,
-            "disable": 0,
-            "sequestered": 0
-          }
-        ]    
-      }
-      body = JSON.dump(dict)
+    # # Fetch Request
+    # res = http.request(req)
+    # response = JSON.parse(res.body)
+    # response_data = response["response_data"]
+    # if response_data.empty? #member is not signed up
+    #   # make post to vault
+    #   uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/add')
+    #   http = Net::HTTP.new(uri.host, uri.port)
+    #   http.use_ssl = true
+    #   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    #   dict = {
+    #     "items": [
+    #       {
+    #         "vault_type": "ACME_LOYALTY",
+    #         "description": "Sample Card",
+    #         "encrypted_data": {},
+    #         "account_id": @account_id,
+    #         "unencrypted_json": {
+    #           "merch_id": 001,
+    #         "tap_id": 1234,
+    #         "amount_due": "get from initial tap"
+    #         },
+    #         "end_of_life": 1474480166,
+    #         "disable": 0,
+    #         "sequestered": 0
+    #       }
+    #     ]    
+    #   }
+    #   body = JSON.dump(dict)
 
-      # Create Request
-      req =  Net::HTTP::Post.new(uri)
-      # Add headers
-      req.add_field "Authorization", "Token " + token
-      # Add headers
-      req.add_field "Content-Type", "application/json"
-      # Set body
-      req.body = body
+    #   # Create Request
+    #   req =  Net::HTTP::Post.new(uri)
+    #   # Add headers
+    #   req.add_field "Authorization", "Token " + token
+    #   # Add headers
+    #   req.add_field "Content-Type", "application/json"
+    #   # Set body
+    #   req.body = body
 
-      # Fetch Request
-      res = http.request(req)
-      response = JSON.parse(res.body)
-      response_data = response["response_data"]
-      @vault_id = response_data["vault_id"]
-      # vault is now setup and customer can just pay
-      # make call to adjust vault balance
+    #   # Fetch Request
+    #   res = http.request(req)
+    #   response = JSON.parse(res.body)
+    #   response_data = response["response_data"]
+    #   @vault_id = response_data["vault_id"]
+    #   # vault is now setup and customer can just pay
+    #   # make call to adjust vault balance
 
-      uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/adjust_demo_balance')
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      dict = {
-        "item_id": @vault_id,
-        "adjustment": "-100" 
-         # add logic for points conversion
-      }
-      body = JSON.dump(dict)
+    #   uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/adjust_demo_balance')
+    #   http = Net::HTTP.new(uri.host, uri.port)
+    #   http.use_ssl = true
+    #   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    #   dict = {
+    #     "item_id": @vault_id,
+    #     "adjustment": "-100" 
+    #      # add logic for points conversion
+    #   }
+    #   body = JSON.dump(dict)
 
-      # Create Request
-      req =  Net::HTTP::Post.new(uri)
-      # Add headers
-      req.add_field "Authorization", "Token " + token
-      # Add headers
-      req.add_field "Content-Type", "application/json"
-      # Set body
-      req.body = body
+    #   # Create Request
+    #   req =  Net::HTTP::Post.new(uri)
+    #   # Add headers
+    #   req.add_field "Authorization", "Token " + token
+    #   # Add headers
+    #   req.add_field "Content-Type", "application/json"
+    #   # Set body
+    #   req.body = body
 
-      # Fetch Request
-      res = http.request(req)
-      response = JSON.parse(res.body)
-      response_data = response["response_data"]
-      status_code = response["status_code"]
-    else
-      # make call to get loyalty points
-      uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/get_balance')
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-      dict = {
-        "item_ids": [
-          @vault_id
-        ]
-      }
-      body = JSON.dump(dict)
+    #   # Fetch Request
+    #   res = http.request(req)
+    #   response = JSON.parse(res.body)
+    #   response_data = response["response_data"]
+    #   status_code = response["status_code"]
+    # else
+    #   # make call to get loyalty points
+    #   uri = URI('https://hack.modoapi.com/1.0.0-dev/vault/get_balance')
+    #   http = Net::HTTP.new(uri.host, uri.port)
+    #   http.use_ssl = true
+    #   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    #   dict = {
+    #     "item_ids": [
+    #       @vault_id
+    #     ]
+    #   }
+    #   body = JSON.dump(dict)
 
-      # Create Request
-      req =  Net::HTTP::Post.new(uri)
-      # Add headers
-      req.add_field "Authorization", "Token " + token
-      # Add headers
-      req.add_field "Content-Type", "application/json"
-      # Set body
-      req.body = body
+    #   # Create Request
+    #   req =  Net::HTTP::Post.new(uri)
+    #   # Add headers
+    #   req.add_field "Authorization", "Token " + token
+    #   # Add headers
+    #   req.add_field "Content-Type", "application/json"
+    #   # Set body
+    #   req.body = body
 
-      # Fetch Request
-      res = http.request(req)
-      response = JSON.parse(res.body)
-      status_code = response["status_code"]
-      response_data = response["response_data"]
-      @balance = response_data[@vault_id]["balance"]
-      if @balance > @amount_due 
-        # send request to ingenico 
-        render :json => { account_id, amount, merch_id, yes }
+    #   # Fetch Request
+    #   res = http.request(req)
+    #   response = JSON.parse(res.body)
+    #   status_code = response["status_code"]
+    #   response_data = response["response_data"]
+    #   @balance = response_data[@vault_id]["balance"]
+    #   if @balance > @amount_due 
+    #     # send request to ingenico 
+    #     render :json => { account_id, amount, merch_id, yes }
         
-      else
-        render :json => { account_id, amount, merch_id, no }
+    #   else
+    #     render :json => { account_id, amount, merch_id, no }
 
-      end
-    rescue StandardError => e
-      puts "HTTP Request failed (#{e.message})"
+    #   end
+    # rescue StandardError => e
+    #   puts "HTTP Request failed (#{e.message})"
   end
 
   # def update
