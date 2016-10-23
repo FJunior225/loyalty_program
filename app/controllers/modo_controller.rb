@@ -12,7 +12,7 @@ class ModoController < ApplicationController
     token = JWT.encode(payload, ENV["secret_key"], 'HS256')
     puts "My Params"
     puts params
-    @card = request["uid"]
+    @card = request["uid"].to_i
     @merch_id = 0001
     @amount_due = 30
 
